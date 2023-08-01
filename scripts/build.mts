@@ -33,6 +33,9 @@ const preBundle: esbuild.Plugin = {
           copyFileSync(`i18n/${file}`, `dist/i18n/${file}`);
         }
       });
+      readdirSync("kernel").forEach((file) => {
+        copyFileSync(`kernel/${file}`, `dist/${file}`);
+      });
 
       const mainPackage = JSON.parse(readFileSync("package.json", "utf-8"));
 
@@ -77,7 +80,7 @@ Promise.all([
     entryPoints: ["src/main/index.ts"],
     platform: "node",
     target: `node${NODE_VERSION}`,
-    outfile: "dist/main.js",
+    outfile: "dist/rpMain.js",
     external: ["electron"],
   }),
   // Preload
@@ -86,7 +89,7 @@ Promise.all([
     entryPoints: ["src/preload.ts"],
     platform: "node",
     target: [`node${NODE_VERSION}`, `chrome${CHROME_VERSION}`],
-    outfile: "dist/preload.js",
+    outfile: "dist/rpPreload.js",
     external: ["electron"],
   }),
   // Renderer
@@ -95,7 +98,7 @@ Promise.all([
     entryPoints: ["src/renderer/index.ts"],
     platform: "browser",
     target: `chrome${CHROME_VERSION}`,
-    outfile: "dist/renderer.js",
+    outfile: "dist/rpRenderer.js",
     format: "esm",
   }),
 ]);

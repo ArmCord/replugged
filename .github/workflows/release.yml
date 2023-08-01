@@ -31,7 +31,31 @@ jobs:
       - name: Build TypeScript and bundle into asar
         run: pnpm run bundle
 
-      - uses: ncipollo/release-action@v1
+      - name: Zip it up!
+        run: zip -r release.zip dist
+        
+      - name: Get some values needed for the release
+        id: vars
+        shell: bash
+        run: |
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+
+      - uses: dev-drprasad/delete-tag-and-release@v0.2.1
         with:
-          artifacts: "*.asar"
-          makeLatest: true
+          delete_release: true
+          tag_name: devbuild
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create the release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: devbuild
+          name: Dev Build ${{ steps.vars.outputs.sha_short }}
+          draft: false
+          prerelease: true
+          body_path: .github/release.md
+          files: |
+            release.zip
